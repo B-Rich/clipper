@@ -5,7 +5,7 @@ import re
 from random import randint
 # from subprocess import call
 import os
- 
+
 #===============================================================================
 #===============================================================================
 
@@ -263,5 +263,13 @@ for poly in solution:
 svgBuilder.AddPolygons(holes, 0x0, 0xFFFF0000)
 svgBuilder.SaveToFile('./test.svg', invScale, 100)
 
-if result: os.startfile('test.svg') # call(('open', 'test.svg')) # print("finished") # 
-else: print("failed")
+if result:
+    if os.sys.platform=='windows': 
+        os.startfile('test.svg') # call(('open', 'test.svg')) # print("finished") # 
+    # elif os.sys.platform=='darwin':
+    #    os.system('open test.svg')
+    else:
+        os.system('inkscape test.svg')
+else: 
+    print("failed")
+
