@@ -4,8 +4,8 @@ from Cython.Distutils import build_ext
 
   
 
-ext =	Extension("pyclipper", 
-                sources=["pyclipper.pyx", "./../cpp/clipper.cpp"],
+ext =	Extension("clipper", 
+                sources=["clipper.pyx", "./../cpp/clipper.cpp"],
 	          	libraries=["stdc++"], # "ln", "util" ,"pthread" ,"rt" 
                 language="c++",              # this causes Pyrex/Cython to create C++ source
 				# library_dirs=["."],

@@ -50,6 +50,8 @@ def build_deps(hppFilename,pyx):
 
 """)
     pyx("""from libcpp.vector cimport vector
+# from libcpp.bool cimport bool
+ctypedef char bool
 
 """)
 
@@ -95,12 +97,11 @@ def main():
                 pyx(indentSpace+"cdef enum "+thisEnum["name"]+":\n")
                 indentSpace="    "
                 for i in range(0,len(thisEnum["values"])):
-                    if i > 0:
-                        pyx(indentSpace+", ")
-                    else:
-                        pyx(indentSpace)
+                    pyx(indentSpace)
                     pyx(thisEnum["values"][i]["name"]+"=")
                     pyx("%d" % thisEnum["values"][i]["value"])
+                    if i < len(thisEnum["values"])-1:
+                        pyx(",")
                     pyx("\n")
                 pyx("\n")
 
@@ -108,15 +109,42 @@ def main():
             indentSpace="  "
             typedefMatch=re.search('(\A\w+)::(\w+)',thisTypedef)
             (typedefNS,typedefName)=(typedefMatch.group(1),typedefMatch.group(2))
-            if typedefNS == thisNS:
+            if typedefNS == thisNS and not re.search('::',cppHeader.typedefs[thisTypedef]):
                 # print("# %s %s" % (thisTypedef,cppHeader.typedefs[thisTypedef]))
                 # pyx(indentSpace+"# ctypedef %s::%s %s\n" % (typedefNS,typedefName,cppHeader.typedefs[thisTypedef]))
-                pyx(indentSpace+"ctypedef "+typedefName+" "+cppHeader.typedefs[thisTypedef]+"\n")
+                pyx(indentSpace)
+                if re.search('::',cppHeader.typedefs[thisTypedef]):
+                    pyx("#1 ")
+                pyx("ctypedef "+cppHeader.typedefs[thisTypedef]+" "+typedefName+"\n")
+            else:
+                typedefMatch=re.search('std::vector<([^>]+)>',cppHeader.typedefs[thisTypedef])
+                typedefNameSearchTxt="\A"+thisNS+"::(\w+)"
+                typedefNameFiltered=re.search(typedefNameSearchTxt,thisTypedef)
+                if typedefMatch:
+                    if typedefNameFiltered:
+                        pyx(indentSpace+"ctypedef vector["+typedefMatch.group(1)+"] "+typedefNameFiltered.group(1)+"\n")
+                    else:
+                        pyx(indentSpace+"ctypedef vector["+typedefMatch.group(1)+"] "+thisTypedef+"\n")
+                else:
+                    pyx("#2 ctypedef "+cppHeader.typedefs[thisTypedef]+" "+typedefName+"\n")
 
         def print_struct(indSpace="  ",structName=""):
             pyx(indSpace+"cdef struct "+structName+":\n")
             for entry in cppHeader.classes[structName]['properties']['public']:
-                pyx(indSpace+"  "+entry['type']+" "+entry['name']+"\n")
+                entryType=entry['type']
+                # print("   Checking '%s'"%entryType)
+                for tdkey in cppHeader.typedefs.keys():
+                    tdval=cppHeader.typedefs[tdkey]
+                    matchString="\A"+cppHeader.classes[structName]['namespace']+"::(\w+)"
+                    namespaceMatch=re.search(matchString,tdkey)
+                    # print("        '%s' '%s' '%s'"%(tdkey,tdval,matchString))
+                    if tdval == entryType:
+                        # print("         Matched '%s' == '%s'"%(tdval,entryType))
+                        if namespaceMatch:
+                            # print("               Matched!")
+                            entryType=namespaceMatch.group(1)
+                            # entryType=tdkey
+                pyx(indSpace+"  "+entryType+" "+entry['name']+"\n")
 
         def print_class(indSpace="  ",className=""):
             pyx(indSpace+"cdef cppclass %s:\n" % className )
@@ -157,6 +185,7 @@ def main():
                 else:
                     print_class(indSpace=indentSpace,className=thisClass)
 
+    pyx("\n# EOF\n")
     pyxFile.close()
 
     return True
