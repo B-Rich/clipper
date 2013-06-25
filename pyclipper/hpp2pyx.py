@@ -176,14 +176,15 @@ def main():
                     pyx(")\n")
                 
         # struct is cppHeader.classes['IntPoint']['methods']['public'][0]['returns_fundamental']
-        for thisClass in cppHeader.classes:
+        # for thisClass in cppHeader.classes:
+        for thisClass in cppHeader.classes_order:
             indentSpace="  "
-            if cppHeader.classes[thisClass]["namespace"] == thisNS:
-                print("Processing "+thisClass)
-                if cppHeader.classes[thisClass]['declaration_method'] == 'struct':
-                    print_struct(indSpace=indentSpace,structName=thisClass)
+            if thisClass["namespace"] == thisNS:
+                print("Processing "+thisClass['name'])
+                if thisClass['declaration_method'] == 'struct':
+                    print_struct(indSpace=indentSpace,structName=thisClass['name'])
                 else:
-                    print_class(indSpace=indentSpace,className=thisClass)
+                    print_class(indSpace=indentSpace,className=thisClass['name'])
 
     pyx("\n# EOF\n")
     pyxFile.close()
