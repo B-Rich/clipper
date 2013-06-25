@@ -76,7 +76,9 @@ def main():
     pyxFile = open( pyxFilename, "w")
     pyx = pyxFile.write
 
+    print("Building header...")
     build_header(hppFilename,pyx)
+    print("Building deps...")
     build_deps(hppFilename,pyx)
 
     indentSpace=""
@@ -86,7 +88,7 @@ def main():
 
         for thisEnum in cppHeader.enums:
             indentSpace="  "
-            # print("\nEnum: %s\n" % thisEnum)
+            print("Enum: %s" % thisEnum['name'])
             enumNS=re.search('(\A\w+)',thisEnum["namespace"]).group(0)
             if enumNS == thisNS:
                 pyx(indentSpace+"# Enum: %s\n" % thisEnum["name"] )
@@ -107,26 +109,53 @@ def main():
             typedefMatch=re.search('(\A\w+)::(\w+)',thisTypedef)
             (typedefNS,typedefName)=(typedefMatch.group(1),typedefMatch.group(2))
             if typedefNS == thisNS:
-                print("# %s %s" % (thisTypedef,cppHeader.typedefs[thisTypedef]))
-                pyx(indentSpace+"# ctypedef %s::%s %s\n" % (typedefNS,typedefName,cppHeader.typedefs[thisTypedef]))
+                # print("# %s %s" % (thisTypedef,cppHeader.typedefs[thisTypedef]))
+                # pyx(indentSpace+"# ctypedef %s::%s %s\n" % (typedefNS,typedefName,cppHeader.typedefs[thisTypedef]))
+                pyx(indentSpace+"ctypedef "+typedefName+" "+cppHeader.typedefs[thisTypedef]+"\n")
 
+        def print_struct(indSpace="  ",structName=""):
+            pyx(indSpace+"cdef struct "+structName+":\n")
+            for entry in cppHeader.classes[structName]['properties']['public']:
+                pyx(indSpace+"  "+entry['type']+" "+entry['name']+"\n")
+
+        def print_class(indSpace="  ",className=""):
+            pyx(indSpace+"cdef cppclass %s:\n" % className )
+            for thisPublicMethod in cppHeader.classes[className]["methods"]["public"]:
+                if thisPublicMethod['constructor']:
+                    pyx(indSpace+"  "+thisPublicMethod['name']+"()\n")
+                elif thisPublicMethod['destructor']:
+                    pyx(indSpace+"  # "+thisPublicMethod['debug']+"\n")
+                else:
+                    rtnType=thisPublicMethod['rtnType']
+                    matchString="\A"+thisPublicMethod['namespace']+"(\w+)"
+                    namespaceMatch=re.search(matchString,rtnType)
+                    if namespaceMatch:
+                        rtnType=namespaceMatch.group(1)
+                    pyx(indSpace+"  "+rtnType+" "
+                        +thisPublicMethod['name']+"(") 
+                    # )
+                    for i in range(0,len(thisPublicMethod['parameters'])):
+                        thisParam=thisPublicMethod['parameters'][i]
+                        if i>0:
+                            pyx(",")
+                        rtnType=thisParam['type']
+                        matchString="\A"+thisPublicMethod['namespace']+"(\w+)"
+                        namespaceMatch=re.search(matchString,rtnType)
+                        if namespaceMatch:
+                            rtnType=namespaceMatch.group(1)
+                        pyx(rtnType+" "+thisParam['name'])
+                    # (
+                    pyx(")\n")
+                
+        # struct is cppHeader.classes['IntPoint']['methods']['public'][0]['returns_fundamental']
         for thisClass in cppHeader.classes:
             indentSpace="  "
             if cppHeader.classes[thisClass]["namespace"] == thisNS:
-                pyx(indentSpace+"# Class: %s\n" % thisClass )
-                for thisMethod in cppHeader.classes[thisClass]["methods"]:
-                    pyx("#  Method: %s\n" % thisMethod )
-                    for thisFunction in cppHeader.classes[thisClass]["methods"][thisMethod]:
-                        pyx("#    Function: %s\n" % thisFunction["name"])
-                        for thisPart in thisFunction:
-                            pyx("#      Part: %s\n" % thisPart)
-                            if thisPart is "parent":
-                                pyx("### Don't follow parent.\n")
-                            elif thisPart is "parameters" and thisFunction["parameters"] is not None:
-                                for thisParam in thisFunction["parameters"]:
-                                    pyx("#          Parameter: %s\n" % thisParam)
-                            else:
-                                pyx("#          %s\n" % thisFunction[thisPart])
+                print("Processing "+thisClass)
+                if cppHeader.classes[thisClass]['declaration_method'] == 'struct':
+                    print_struct(indSpace=indentSpace,structName=thisClass)
+                else:
+                    print_class(indSpace=indentSpace,className=thisClass)
 
     pyxFile.close()
 
