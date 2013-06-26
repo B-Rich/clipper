@@ -3,9 +3,11 @@ from clipper import *
 import math
 import re
 from random import randint
+from random import seed
 # from subprocess import call
 import os
 
+seed(42)
 #===============================================================================
 #===============================================================================
 
@@ -269,7 +271,8 @@ if result:
     # elif os.sys.platform=='darwin':
     #    os.system('open test.svg')
     else:
-        os.system('inkscape test.svg')
+        # os.system('inkscape test.svg')
+        print('inkscape test.svg')
 else: 
     print("failed")
 

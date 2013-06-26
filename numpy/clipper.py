@@ -32,7 +32,9 @@
 #===============================================================================
 
 import math
-from collections import namedtuple
+# import numpy as np
+from numpy import *
+# from collections import namedtuple
 from decimal import Decimal, getcontext
 
 getcontext().prec = 8
@@ -47,8 +49,53 @@ class EdgeSide: (Left, Right) = range(2)
 class Protects: (Neither, Left, Right, Both) = range(4)
 class Direction: (LeftToRight, RightToLeft) = range(2)
 
-Point = namedtuple('Point', 'x y')
-DoublePoint = namedtuple('DoublePoint', 'x y')
+# Point = namedtuple('Point', 'x y')
+class Point(object):
+    xy=array([0,0],dtype='int32')
+    def __init__(self,x,y):
+        self.xy=array([x,y])
+    @property
+    def x(self):
+        return self.xy[0]
+    @x.setter
+    def x(self,value):
+        self.xy[0]=value
+    @x.getter
+    def x(self):
+        return self.xy[0]
+    @property
+    def y(self):
+        return self.xy[1]
+    @y.setter
+    def y(self,value):
+        self.xy[1]=value
+    @y.getter
+    def y(self):
+        return self.xy[1]
+
+# DoublePoint = namedtuple('DoublePoint', 'x y')
+class DoublePoint(object):
+    xy=array([0,0],dtype='double')
+    def __init__(self,x,y):
+        self.xy=array([x,y])
+    @property
+    def x(self):
+        return self.xy[0]
+    @x.setter
+    def x(self,value):
+        self.xy[0]=value
+    @x.getter
+    def x(self):
+        return self.xy[0]
+    @property
+    def y(self):
+        return self.xy[1]
+    @y.setter
+    def y(self,value):
+        self.xy[1]=value
+    @y.getter
+    def y(self):
+        return self.xy[1]
 
 class LocalMinima(object):
     leftBound = rightBound = nextLm = None
@@ -109,7 +156,7 @@ class HorzJoin(object):
 # Unit global functions ...
 #===============================================================================
 def IntsToPoints(ints):
-    result = []
+    result=[]
     for i in range(0, len(ints), 2):
         result.append(Point(ints[i], ints[i+1]))
     return result
@@ -1915,8 +1962,75 @@ class Clipper(ClipperBase):
 # OffsetPolygons (+ ancilliary functions)
 #===============================================================================
 
-FloatPoint = namedtuple('FloatPoint', 'x y')
-Rect = namedtuple('FloatPoint', 'left top right bottom')
+# FloatPoint = namedtuple('FloatPoint', 'x y')
+class FloatPoint(object):
+    xy=array([0,0],dtype='float64')
+    def __init__(self,x,y):
+        self.xy=array([x,y])
+    @property
+    def x(self):
+        return self.xy[0]
+    @x.setter
+    def x(self,value):
+        self.xy[0]=value
+    @x.getter
+    def x(self):
+        return self.xy[0]
+    @property
+    def y(self):
+        return self.xy[1]
+    @y.setter
+    def y(self,value):
+        self.xy[1]=value
+    @y.getter
+    def y(self):
+        return self.xy[1]
+
+# Rect = namedtuple('FloatPoint', 'left top right bottom')
+class Rect(object):
+    corners=array([[0,0],[0,0]],dtype='float64')
+    def __init__(self,left,top,right,bottom):
+        self.corners=array([[left,top],[right,bottom]],dtype='float64')
+
+    @property
+    def left(self):
+        return self.corners[0][0]
+    @left.setter
+    def left(self,value):
+        self.corners[0][0]=value
+    @left.getter
+    def left(self):
+        return self.corners[0][0]
+
+    @property
+    def top(self):
+        return self.corners[0][1]
+    @top.setter
+    def top(self,value):
+        self.corners[0][1]=value
+    @top.getter
+    def top(self):
+        return self.corners[0][1]
+
+    @property
+    def right(self):
+        return self.corners[1][0]
+    @right.setter
+    def right(self,value):
+        self.corners[1][0]=value
+    @right.getter
+    def right(self):
+        return self.corners[1][0]
+
+    @property
+    def bottom(self):
+        return self.corners[1][1]
+    @bottom.setter
+    def bottom(self,value):
+        self.corners[1][1]=value
+    @bottom.getter
+    def bottom(self):
+        return self.corners[1][1]
 
 def _GetUnitNormal(pt1, pt2):
     if pt2.x == pt1.x and pt2.y == pt1.y:
