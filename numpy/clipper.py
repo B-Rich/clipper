@@ -54,6 +54,10 @@ class Point(object):
     xy=array([0,0],dtype='int32')
     def __init__(self,x,y):
         self.xy=array([x,y])
+    def __getitem__(self,i):
+        return self.xy[i]
+    def __setitem__(self,i,val):
+        self.xy[i]=val
     @property
     def x(self):
         return self.xy[0]
@@ -78,6 +82,10 @@ class DoublePoint(object):
     xy=array([0,0],dtype='double')
     def __init__(self,x,y):
         self.xy=array([x,y])
+    def __getitem__(self,i):
+        return self.xy[i]
+    def __setitem__(self,i,val):
+        self.xy[i]=val
     @property
     def x(self):
         return self.xy[0]
@@ -161,12 +169,20 @@ def IntsToPoints(ints):
         result.append(Point(ints[i], ints[i+1]))
     return result
 
+def IntsToArray(ints):
+    result=array(0)
+    result.resize(len(ints)/2,2)
+    for i in range(0,len(ints),2):
+        result[i/2][0]=ints[i]
+        result[i/2][1]=ints[i+1]
+    return result
+
 def Area(polygon):
     # see http://www.mathopenref.com/coordpolygonarea2.html
     highI = len(polygon) - 1
-    A = (polygon[highI].x + polygon[0].x) * (polygon[0].y - polygon[highI].y)
+    A = (polygon[highI][0] + polygon[0][0]) * (polygon[0][1] - polygon[highI][1])
     for i in range(highI):
-        A += (polygon[i].x + polygon[i+1].x) * (polygon[i+1].y - polygon[i].y)
+        A += (polygon[i][0] + polygon[i+1][0]) * (polygon[i+1][1] - polygon[i][1])
     return float(A) / 2
 
 def Orientation(polygon):
@@ -1967,6 +1983,10 @@ class FloatPoint(object):
     xy=array([0,0],dtype='float64')
     def __init__(self,x,y):
         self.xy=array([x,y])
+    def __getitem__(self,i):
+        return self.xy[i]
+    def __setitem__(self,i,val):
+        self.xy[i]=val
     @property
     def x(self):
         return self.xy[0]
@@ -1991,6 +2011,10 @@ class Rect(object):
     corners=array([[0,0],[0,0]],dtype='float64')
     def __init__(self,left,top,right,bottom):
         self.corners=array([[left,top],[right,bottom]],dtype='float64')
+    def __getitem__(self,i):
+        return self.corners[i]
+    def __setitem__(self,i,val):
+        self.corners[i]=val
 
     @property
     def left(self):
