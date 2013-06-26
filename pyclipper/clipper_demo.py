@@ -1,10 +1,15 @@
 # from clipper import Area, Clipper, Point, ClipType, PolyType, PolyFillType
-from clipper import * 
+import cython
+import clipper
+# from clipper import * 
 import math
 import re
 from random import randint
 # from subprocess import call
 import os
+from collections import namedtuple
+
+Point = namedtuple('IntPoint', 'x y')
 
 #===============================================================================
 #===============================================================================

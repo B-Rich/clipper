@@ -180,11 +180,36 @@ def main():
         for thisClass in cppHeader.classes_order:
             indentSpace="  "
             if thisClass["namespace"] == thisNS:
-                print("Processing "+thisClass['name'])
+                pyx("\n")
                 if thisClass['declaration_method'] == 'struct':
+                    print("Processing struct "+thisClass['name'])
                     print_struct(indSpace=indentSpace,structName=thisClass['name'])
                 else:
+                    print("Processing class "+thisClass['name'])
                     print_class(indSpace=indentSpace,className=thisClass['name'])
+        for thisFunc in cppHeader.functions:
+            indentSpace="  "
+            if thisFunc["namespace"] == thisNS or thisFunc["namespace"] == (thisNS+"::"):
+                pyx("\n")
+                print("Processing function %s"%thisFunc['name'])
+                if re.search("::",thisFunc['rtnType']):
+                    pyx(indentSpace+"# %s\n"%thisFunc['debug'])
+                else:
+                    # pyx(indentSpace+"# %s\n"%thisFunc['debug'])
+                    pyx(indentSpace+thisFunc["rtnType"]+" "+thisFunc["name"]+"(") 
+                    # )
+                    for i in range(0,len(thisFunc['parameters'])):
+                        thisParam=thisFunc['parameters'][i]
+                        if i>0:
+                            pyx(",")
+                        rtnType=thisParam['type']
+                        matchString="\A"+thisFunc['namespace']+"(\w+)"
+                        namespaceMatch=re.search(matchString,rtnType)
+                        if namespaceMatch:
+                            rtnType=namespaceMatch.group(1)
+                        pyx(rtnType+" "+thisParam['name'])
+                    # (
+                    pyx(")\n")
 
     pyx("\n# EOF\n")
     pyxFile.close()

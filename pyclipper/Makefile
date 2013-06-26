@@ -16,3 +16,8 @@ clipper.o : clipper.pyx
 test.svg : clipper.o
 	python clipper_demo.py
 
+clean :
+	$(RM) *.pyc
+	$(RM) clipper.cpp
+	$(RM) clipper.pyx
+	$(RM) clipper.so
