@@ -266,8 +266,13 @@ def PolyTreeToPolygons(polyTree):
 #===============================================================================
 
 class Edge(object):
-
+    # corners=array([[0,0],[0,0],[0,0]],dtype='float64')
+#    def __getitem__(self,i):
+#        return self.corners[i]
+#    def __setitem__(self,i,val):
+#        self.corners[i]=val
     def __init__(self):
+        # self.corners=array([[0,0],[0,0],[0,0]],dtype='float64')
         self.xBot, self.yBot, self.xCurr, self.yCurr, = 0, 0, 0, 0
         self.xTop, self.yTop = 0, 0
         self.dx, self.deltaX , self.deltaY = Decimal(0), Decimal(0), Decimal(0)
@@ -277,10 +282,70 @@ class Edge(object):
         self.outIdx = -1
         self.nextE, self.prevE, self.nextInLML = None, None, None
         self.prevInAEL, self.nextInAEL, self.prevInSEL, self.nextInSEL = None, None, None, None
-        
     def __repr__(self):
         return "(%i,%i . %i,%i {dx:%0.2f} %i {%x})" % \
             (self.xBot, self.yBot, self.xTop, self.yTop, self.dx, self.outIdx, id(self))
+
+#    @property
+#    def xBot(self):
+#        return self.corners[0][0]
+#    @xBot.setter
+#    def xBot(self,value):
+#        self.corners[0][0]=value
+#    @xBot.getter
+#    def xBot(self):
+#        return self.corners[0][0]
+#
+#    @property
+#    def yBot(self):
+#        return self.corners[0][1]
+#    @yBot.setter
+#    def yBot(self,value):
+#        self.corners[0][1]=value
+#    @yBot.getter
+#    def yBot(self):
+#        return self.corners[0][1]
+#
+#    @property
+#    def xCurr(self):
+#        return self.corners[1][0]
+#    @xCurr.setter
+#    def xCurr(self,value):
+#        self.corners[1][0]=value
+#    @xCurr.getter
+#    def xCurr(self):
+#        return self.corners[1][0]
+#
+#    @property
+#    def yCurr(self):
+#        return self.corners[1][1]
+#    @yCurr.setter
+#    def yCurr(self,value):
+#        self.corners[1][1]=value
+#    @yCurr.getter
+#    def yCurr(self):
+#        return self.corners[1][1]
+#
+#    @property
+#    def xTop(self):
+#        return self.corners[2][0]
+#    @xTop.setter
+#    def xTop(self,value):
+#        self.corners[2][0]=value
+#    @xTop.getter
+#    def xTop(self):
+#        return self.corners[2][0]
+#
+#    @property
+#    def yTop(self):
+#        return self.corners[2][1]
+#    @yTop.setter
+#    def yTop(self,value):
+#        self.corners[2][1]=value
+#    @yTop.getter
+#    def yTop(self):
+#        return self.corners[2][1]
+
 
 #===============================================================================
 # ClipperBase class (+ data structs & ancilliary functions)
@@ -2087,24 +2152,14 @@ def _BuildArc(pt, a1, a2, r, limit):
     return result
 
 def _GetBounds(pts):
-    left = None
-    for poly in pts:
-        for pt in poly:
-            left = pt.x
-            top = pt.y
-            right = pt.x
-            bottom = pt.y
-            break
-        break
-    
-    for poly in pts:
-        for pt in poly:
-            if pt.x < left: left = pt.x
-            if pt.x > right: right = pt.x
-            if pt.y < top: top = pt.y
-            if pt.y > bottom: bottom = pt.y
-    if left is None: return Rect(0, 0, 0, 0)
-    else: return Rect(left, top, right, bottom)
+    # Replace with numpy array to use max(axis=0),min(axis=0) column values
+    maxvals=pts.max(axis=0)
+    minvals=pts.min(axis=0)
+    left=minvals[0]
+    right=maxvals[0]
+    top=maxvals[1]
+    bottom=minvals[1]
+    return Rect(left, top, right, bottom)
 
 def _GetLowestPt(poly):
     # precondition: poly must not be empty
